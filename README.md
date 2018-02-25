@@ -1,2 +1,2 @@
 # WCuda
-Workspace used to do the exercises, tutorials and practical work in CUDA lesson.
+Workspace used to do the exercises, tutorials and practical works in CUDA lesson.
