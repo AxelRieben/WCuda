@@ -2,6 +2,8 @@
 
 #include "cudaTools.h"
 #include "MathTools.h"
+#include "SphereCreator.h"
+#include "Sphere.h"
 
 #include "Animable_I_GPU.h"
 using namespace gpu;
@@ -53,6 +55,11 @@ class RayTracing: public Animable_I<uchar4>
 
 	// Inputs
 	float dt;
+
+	//Tools
+	int nbSphere;
+	Sphere* ptrDevTabSphere;
+	size_t sizeOctetSphere;
 
     };
 

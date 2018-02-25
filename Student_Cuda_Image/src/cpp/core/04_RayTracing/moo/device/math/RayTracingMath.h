@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include "MathTools.h"
+#include "Sphere.h"
 
 #include "ColorTools_GPU.h"
 using namespace gpu;
@@ -23,15 +24,13 @@ class RayTracingMath
 
     public:
 
-	__device__ RayTracingMath(int w, int h)
+	__device__ RayTracingMath(int w, int h, Sphere* ptrDevTabSphere, int nbSphere)
 	    {
-	    this->factor = 4 * PI_FLOAT / (float) w;
+	    this->ptrDevTabSphere = ptrDevTabSphere;
+	    this->nbSphere = nbSphere;
 	    }
 
-	// constructeur copie automatique car pas pointeur dans VagueMath
-
-	__device__
-	 virtual ~RayTracingMath()
+	__device__  virtual ~RayTracingMath()
 	    {
 	    // rien
 	    }
@@ -45,23 +44,57 @@ class RayTracingMath
 	__device__
 	void colorIJ(uchar4* ptrColor, int i, int j, float t)
 	    {
-	    uchar levelGris;
+	    //Init
+	    float2 xySol;
+	    xySol.x = i;
+	    xySol.y = j;
+	    float distance = 0;
+	    float dz = 0;
+	    bool isBlack = true;
 
-	    f(&levelGris, i, j, t); // update levelGris
+	    //Loop in sphere array
+	    for (int a = 0; a < nbSphere; a++)
+		{
+		ptrDevCurrentSphere = &ptrDevTabSphere[a];
+		float hCarree = ptrDevCurrentSphere->hCarre(xySol);
 
-	    ptrColor->x = levelGris;
-	    ptrColor->y = levelGris;
-	    ptrColor->z = levelGris;
+		if (ptrDevCurrentSphere->isEnDessous(hCarree))
+		    {
+		    isBlack = false;
+		    float dzCurrent = ptrDevCurrentSphere->dz(hCarree);
+		    float distanceCurrent = ptrDevCurrentSphere->distance(dzCurrent);
 
-	    ptrColor->w = 255; // opaque
+		    if (distanceCurrent < distance || a == 0)
+			{
+			dz = dzCurrent;
+			distance = distanceCurrent;
+			ptrNearestSphere = ptrDevCurrentSphere;
+			}
+		    }
+		}
+
+	    //Color the pixel qith the color of the nearest sphere
+	    colorPixel(t, dz, ptrColor, isBlack);
 	    }
 
     private:
-
 	__device__
-	void f(uchar* ptrLevelGris, int i, int j, float t)
+	void colorPixel(float t, float dz, uchar4* ptrColor, bool isBlack)
 	    {
-	    *ptrLevelGris = 255 * fabs(sinf(i * factor + t));
+	    if (!isBlack)
+		{
+		float brightness = ptrNearestSphere->brightness(dz);
+		float h = ptrNearestSphere->getHueStart() + ptrNearestSphere->hue(t);
+		ColorTools::HSB_TO_RVB(h, 1, brightness, ptrColor);
+		}
+	    else
+		{
+		ptrColor->x = 0;
+		ptrColor->y = 0;
+		ptrColor->z = 0;
+		}
+
+	    ptrColor->w = 255; // opaque
 	    }
 
 	/*--------------------------------------*\
@@ -70,10 +103,14 @@ class RayTracingMath
 
     private:
 
-	// Tools
-	float factor;
+	//Input
+	int nbSphere;
+	Sphere* ptrDevTabSphere;
+	Sphere* ptrDevCurrentSphere;
+	Sphere* ptrNearestSphere;
 
-    };
+    }
+;
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

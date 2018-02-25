@@ -18,7 +18,7 @@ using namespace gpu;
  |*		Public			*|
  \*-------------------------------------*/
 
-__global__ void rayTracing(uchar4* ptrDevPixels,uint w, uint h,float t);
+__global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
 
 /*--------------------------------------*\
  |*		Private			*|
@@ -32,9 +32,9 @@ __global__ void rayTracing(uchar4* ptrDevPixels,uint w, uint h,float t);
  |*		Public			*|
  \*-------------------------------------*/
 
-__global__ void rayTracing(uchar4* ptrDevPixels, uint w, uint h, float t)
+__global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t)
     {
-    RayTracingMath rayTracingMath = RayTracingMath(w, h);
+    RayTracingMath rayTracingMath = RayTracingMath(w, h,ptrDevTabSphere,nbSphere);
 
     const int WH=w*h;
     const int TID = Indice2D::tid();

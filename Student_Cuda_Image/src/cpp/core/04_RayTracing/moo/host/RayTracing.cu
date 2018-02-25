@@ -4,6 +4,7 @@
 #include "Device.h"
 #include "RayTracing.h"
 
+
 using std::cout;
 using std::endl;
 
@@ -15,7 +16,7 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern __global__ void rayTracing(uchar4* ptrDevPixels,uint w, uint h,float t);
+extern __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
 
 /*--------------------------------------*\
  |*		Public			*|
@@ -45,11 +46,23 @@ RayTracing::RayTracing(const Grid& grid, uint w, uint h, float dt) :
 
     // Tools
     this->t = 0; // protected dans Animable
+
+    this->nbSphere = 5;
+
+    this->sizeOctetSphere = nbSphere * sizeof(Sphere);
+
+    SphereCreator* creator = new SphereCreator(nbSphere, w, h);
+
+    Sphere* ptrTabSphere = creator->getTabSphere();
+
+    Device::malloc(&ptrDevTabSphere, sizeOctetSphere);
+    Device::memcpyHToD(ptrDevTabSphere, ptrTabSphere, sizeOctetSphere);
+
     }
 
 RayTracing::~RayTracing()
     {
-    // rien
+    Device::free(ptrDevTabSphere);
     }
 
 /*-------------------------*\
@@ -66,7 +79,7 @@ void RayTracing::process(uchar4* ptrDevPixels, uint w, uint h, const DomaineMath
     {
     Device::lastCudaError("RayTracing rgba uchar4 (before)"); // facultatif, for debug only, remove for release
 
-    rayTracing<<<dg,db>>>(ptrDevPixels,w,h,t);
+    rayTracing<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
 
     Device::lastCudaError("RayTracing rgba uchar4 (after)"); // facultatif, for debug only, remove for release
     }
