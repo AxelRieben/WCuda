@@ -1,12 +1,8 @@
-#include "MandelBrotProvider.h"
-#include "MandelBrot.h"
+#include "RayTracing.h"
 
 #include "MathTools.h"
 #include "Grid.h"
-
-#include "DomaineMath_GPU.h"
-
-using gpu::DomaineMath;
+#include "RayTracingProvider.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
@@ -35,40 +31,32 @@ using gpu::DomaineMath;
 /**
  * Override
  */
-Animable_I<uchar4>* MandelBrotProvider::createAnimable()
+Animable_I<uchar4>* RayTracingProvider::createAnimable()
     {
-    DomaineMath domaineMath = DomaineMath(-2.1, -1.3, 0.8, 1.3);
-
-    // Animation
-    int dt = 2;
-    int n = 50;
+    // Animation;
+    float dt = 2 * PI / 1000;
 
     // Dimension
-    int w = 1280;
-    int h = 720;
+    int w = 16 * 32 * 2;
+    int h = 16 * 32;
 
     // Grid Cuda
-    int mp = Device::getMPCount();
-    int coreMP = Device::getCoreCountMP();
+    int mp=Device::getMPCount();
+    int coreMP=Device::getCoreCountMP();
 
-    //Opti
-//    dim3 dg = dim3(4, 6, 1);
-//    dim3 db = dim3(96, 10, 1);
-
-//Test
-    dim3 dg = dim3(mp, 2, 1);
-    dim3 db = dim3(coreMP, 2, 1);
+    dim3 dg = dim3(mp, 2, 1);  		// disons, a optimiser selon le gpu, peut drastiqument ameliorer ou baisser les performances
+    dim3 db = dim3(coreMP, 2, 1);   	// disons, a optimiser selon le gpu, peut drastiqument ameliorer ou baisser les performances
     Grid grid(dg, db);
 
-    return new MandelBrot(grid, w, h, dt, n, domaineMath);
+    return new RayTracing(grid, w, h, dt);
     }
 
 /**
  * Override
  */
-Image_I* MandelBrotProvider::createImageGL(void)
+Image_I* RayTracingProvider::createImageGL(void)
     {
-    ColorRGB_01 colorTexte(0, 0, 0); // black
+    ColorRGB_01 colorTexte(1, 0, 0); // red
     return new ImageAnimable_RGBA_uchar4(createAnimable(), colorTexte);
     }
 

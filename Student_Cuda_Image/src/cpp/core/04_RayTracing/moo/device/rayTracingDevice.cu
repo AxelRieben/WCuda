@@ -1,12 +1,10 @@
-#include "MandelBrotProvider.h"
-#include "MandelBrot.h"
+#include "Indice2D.h"
+#include "cudaTools.h"
+#include "Device.h"
+#include "RayTracingMath.h"
 
-#include "MathTools.h"
-#include "Grid.h"
-
-#include "DomaineMath_GPU.h"
-
-using gpu::DomaineMath;
+#include "IndiceTools_GPU.h"
+using namespace gpu;
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
@@ -20,6 +18,8 @@ using gpu::DomaineMath;
  |*		Public			*|
  \*-------------------------------------*/
 
+__global__ void rayTracing(uchar4* ptrDevPixels,uint w, uint h,float t);
+
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
@@ -32,44 +32,26 @@ using gpu::DomaineMath;
  |*		Public			*|
  \*-------------------------------------*/
 
-/**
- * Override
- */
-Animable_I<uchar4>* MandelBrotProvider::createAnimable()
+__global__ void rayTracing(uchar4* ptrDevPixels, uint w, uint h, float t)
     {
-    DomaineMath domaineMath = DomaineMath(-2.1, -1.3, 0.8, 1.3);
+    RayTracingMath rayTracingMath = RayTracingMath(w, h);
 
-    // Animation
-    int dt = 2;
-    int n = 50;
+    const int WH=w*h;
+    const int TID = Indice2D::tid();
+    const int NB_THREAD = Indice2D::nbThread();
 
-    // Dimension
-    int w = 1280;
-    int h = 720;
+    int i;	// in [0,h[
+    int j; 	// in [0,w[
 
-    // Grid Cuda
-    int mp = Device::getMPCount();
-    int coreMP = Device::getCoreCountMP();
+    int s = TID;  // in [0,...
+    while (s < WH)
+	{
+	IndiceTools::toIJ(s, w, &i, &j); 	// update (i, j)
 
-    //Opti
-//    dim3 dg = dim3(4, 6, 1);
-//    dim3 db = dim3(96, 10, 1);
+	rayTracingMath.colorIJ(&ptrDevPixels[s],i, j, t); 	// update ptrDevPixels[s]
 
-//Test
-    dim3 dg = dim3(mp, 2, 1);
-    dim3 db = dim3(coreMP, 2, 1);
-    Grid grid(dg, db);
-
-    return new MandelBrot(grid, w, h, dt, n, domaineMath);
-    }
-
-/**
- * Override
- */
-Image_I* MandelBrotProvider::createImageGL(void)
-    {
-    ColorRGB_01 colorTexte(0, 0, 0); // black
-    return new ImageAnimable_RGBA_uchar4(createAnimable(), colorTexte);
+	s += NB_THREAD;
+	}
     }
 
 /*--------------------------------------*\
@@ -79,3 +61,4 @@ Image_I* MandelBrotProvider::createImageGL(void)
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
  \*---------------------------------------------------------------------*/
+

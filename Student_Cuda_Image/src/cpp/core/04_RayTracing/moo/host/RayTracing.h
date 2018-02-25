@@ -3,7 +3,6 @@
 #include "cudaTools.h"
 #include "MathTools.h"
 
-#include "Variateur_GPU.h"
 #include "Animable_I_GPU.h"
 using namespace gpu;
 
@@ -15,7 +14,7 @@ using namespace gpu;
  |*		Public			*|
  \*-------------------------------------*/
 
-class MandelBrot: public Animable_I<uchar4>
+class RayTracing: public Animable_I<uchar4>
     {
 	/*--------------------------------------*\
 	|*		Constructor		*|
@@ -23,8 +22,8 @@ class MandelBrot: public Animable_I<uchar4>
 
     public:
 
-	MandelBrot(const Grid& grid, uint w, uint h, int dt, uint n, const DomaineMath& domaineMath);
-	virtual ~MandelBrot(void);
+	RayTracing(const Grid& grid, uint w, uint h, float dt);
+	virtual ~RayTracing(void);
 
 	/*--------------------------------------*\
 	 |*		Methodes		*|
@@ -53,10 +52,8 @@ class MandelBrot: public Animable_I<uchar4>
     private:
 
 	// Inputs
-	uint n;
+	float dt;
 
-	// Tools
-	Variateur<uint> variateurAnimation;
     };
 
 /*----------------------------------------------------------------------*\

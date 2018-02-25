@@ -1,10 +1,9 @@
 #pragma once
 
-#include "cudaTools.h"
+#include <math.h>
 #include "MathTools.h"
 
-#include "Variateur_GPU.h"
-#include "Animable_I_GPU.h"
+#include "ColorTools_GPU.h"
 using namespace gpu;
 
 /*----------------------------------------------------------------------*\
@@ -15,48 +14,65 @@ using namespace gpu;
  |*		Public			*|
  \*-------------------------------------*/
 
-class MandelBrot: public Animable_I<uchar4>
+class RayTracingMath
     {
+
 	/*--------------------------------------*\
 	|*		Constructor		*|
 	 \*-------------------------------------*/
 
     public:
 
-	MandelBrot(const Grid& grid, uint w, uint h, int dt, uint n, const DomaineMath& domaineMath);
-	virtual ~MandelBrot(void);
+	__device__ RayTracingMath(int w, int h)
+	    {
+	    this->factor = 4 * PI_FLOAT / (float) w;
+	    }
+
+	// constructeur copie automatique car pas pointeur dans VagueMath
+
+	__device__
+	 virtual ~RayTracingMath()
+	    {
+	    // rien
+	    }
 
 	/*--------------------------------------*\
-	 |*		Methodes		*|
+	|*		Methodes		*|
 	 \*-------------------------------------*/
 
     public:
 
-	/*-------------------------*\
-	|*   Override Animable_I   *|
-	 \*------------------------*/
+	__device__
+	void colorIJ(uchar4* ptrColor, int i, int j, float t)
+	    {
+	    uchar levelGris;
 
-	/**
-	 * Call periodicly by the api
-	 */
-	virtual void process(uchar4* ptrDevPixels, uint w, uint h, const DomaineMath& domaineMath);
+	    f(&levelGris, i, j, t); // update levelGris
 
-	/**
-	 * Call periodicly by the api
-	 */
-	virtual void animationStep();
+	    ptrColor->x = levelGris;
+	    ptrColor->y = levelGris;
+	    ptrColor->z = levelGris;
+
+	    ptrColor->w = 255; // opaque
+	    }
+
+    private:
+
+	__device__
+	void f(uchar* ptrLevelGris, int i, int j, float t)
+	    {
+	    *ptrLevelGris = 255 * fabs(sinf(i * factor + t));
+	    }
 
 	/*--------------------------------------*\
-	 |*		Attributs		*|
+	|*		Attributs		*|
 	 \*-------------------------------------*/
 
     private:
 
-	// Inputs
-	uint n;
-
 	// Tools
-	Variateur<uint> variateurAnimation;
+	float factor;
+
     };
 
 /*----------------------------------------------------------------------*\

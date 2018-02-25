@@ -35,14 +35,14 @@ __global__ void mandelBrot(uchar4* ptrDevPixels, uint w, uint h, uint n, Domaine
 
 __global__ void mandelBrot(uchar4* ptrDevPixels, uint w, uint h, uint n, DomaineMath domaineMath, float t)
     {
-    MandelBrotMath mandelBrotMath = MandelBrotMath(n);
+    MandelBrotMath mandelBrotMath;
 
     const int TID = Indice2D::tid();
     const int NB_THREAD = Indice2D::nbThread();
     const int WH = w * h;
 
-    double x;
-    double y;
+    double x = 0;
+    double y = 0;
 
     int i;
     int j;

@@ -24,16 +24,15 @@ class MandelBrotMath
 
     public:
 
-	__device__ MandelBrotMath(int n) :
-		calibreur(Interval<float>(0, n), Interval<float>(0, 1))
+	__device__ MandelBrotMath() :
+		calibreur(Interval<float>(-1, 1), Interval<float>(0, 1))
 	    {
-		this->n = n;
 	    }
 
 	// constructeur copie automatique car pas pointeur dans VagueMath
 
 	__device__
-	           virtual ~MandelBrotMath()
+	            virtual ~MandelBrotMath()
 	    {
 	    // rien
 	    }
@@ -100,9 +99,6 @@ class MandelBrotMath
 	 \*-------------------------------------*/
 
     private:
-
-	// Input
-	int n;
 
 	// Tools
 	Calibreur<float> calibreur;
