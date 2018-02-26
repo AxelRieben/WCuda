@@ -30,7 +30,7 @@ class RayTracingMath
 	    this->nbSphere = nbSphere;
 	    }
 
-	__device__  virtual ~RayTracingMath()
+	__device__    virtual ~RayTracingMath()
 	    {
 	    // rien
 	    }
@@ -73,7 +73,7 @@ class RayTracingMath
 		    }
 		}
 
-	    //Color the pixel qith the color of the nearest sphere
+	    //Color the pixel with the color of the nearest sphere
 	    colorPixel(t, dz, ptrColor, isBlack);
 	    }
 
@@ -86,6 +86,7 @@ class RayTracingMath
 		float brightness = ptrNearestSphere->brightness(dz);
 		float h = ptrNearestSphere->getHueStart() + ptrNearestSphere->hue(t);
 		ColorTools::HSB_TO_RVB(h, 1, brightness, ptrColor);
+		//ColorTools::HSB_TO_RVB(h, 1, brightness, ptrColor);
 		}
 	    else
 		{

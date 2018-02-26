@@ -86,8 +86,8 @@ int start(Options& option)
     {
     // print
 	{
-	//Device::printAll();
-	Device::printAllSimple();
+	Device::printAll();
+	//Device::printAllSimple();
 	Device::printCurrent();
 	//Device::print(option.getDeviceId());
 	}

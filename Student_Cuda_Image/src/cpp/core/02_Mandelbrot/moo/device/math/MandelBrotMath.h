@@ -24,8 +24,8 @@ class MandelBrotMath
 
     public:
 
-	__device__ MandelBrotMath() :
-		calibreur(Interval<float>(-1, 1), Interval<float>(0, 1))
+	__device__ MandelBrotMath(int n) :
+		calibreur(Interval<float>(0, n), Interval<float>(0, 1))
 	    {
 	    }
 
@@ -44,9 +44,9 @@ class MandelBrotMath
     public:
 
 	__device__
-	void colorXY(uchar4* ptrColor, int x, int y, float n)
+	void colorXY(uchar4* ptrColor, float x, float y, int n)
 	    {
-	    float z = f(x, y, n);
+	    int z = f(x, y, n);
 
 	    if (z == n)
 		{
@@ -67,7 +67,7 @@ class MandelBrotMath
     private:
 
 	__device__
-	int f(float x, float y, float n)
+	int f(float x, float y, int n)
 	    {
 
 	    float a = 0;

@@ -16,7 +16,7 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern __global__ void mandelBrot(uchar4* ptrDevPixels, uint w, uint h, uint n, DomaineMath domaineMath, float t);
+extern __global__ void mandelBrot(uchar4* ptrDevPixels, uint w, uint h, uint n, DomaineMath domaineMath);
 
 /*--------------------------------------*\
  |*		Public			*|
@@ -39,7 +39,7 @@ extern __global__ void mandelBrot(uchar4* ptrDevPixels, uint w, uint h, uint n, 
  \*-------------------------*/
 
 MandelBrot::MandelBrot(const Grid& grid, uint w, uint h, int dt, uint n, const DomaineMath& domaineMath) :
-	Animable_I<uchar4>(grid, w, h, "Mandelbrot_Cuda_RGBA_uchar4", domaineMath), variateurAnimation(Interval<uint>(1, 100), dt)
+	Animable_I<uchar4>(grid, w, h, "Mandelbrot_Cuda_RGBA_uchar4", domaineMath), variateurAnimation(Interval<uint>(30, n), dt)
     {
     // Inputs
     this->n = n;
@@ -68,7 +68,7 @@ void MandelBrot::process(uchar4* ptrDevPixels, uint w, uint h, const DomaineMath
     Device::lastCudaError("mandelbrot rgba uchar4 (before kernel)"); // facultatif, for debug only, remove for release
 
     // le kernel est importer ci-dessus (ligne 19)
-    mandelBrot<<<dg, db>>>(ptrDevPixels,w,h,n,domaineMath,t);
+    mandelBrot<<<dg, db>>>(ptrDevPixels,w,h,n,domaineMath);
 
     Device::lastCudaError("mandelbrot rgba uchar4 (after kernel)"); // facultatif, for debug only, remove for release
     }

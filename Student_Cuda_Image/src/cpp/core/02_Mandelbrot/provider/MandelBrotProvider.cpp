@@ -40,8 +40,8 @@ Animable_I<uchar4>* MandelBrotProvider::createAnimable()
     DomaineMath domaineMath = DomaineMath(-2.1, -1.3, 0.8, 1.3);
 
     // Animation
-    int dt = 2;
-    int n = 50;
+    int dt = 1;
+    int n = 100;
 
     // Dimension
     int w = 1280;
@@ -68,7 +68,7 @@ Animable_I<uchar4>* MandelBrotProvider::createAnimable()
  */
 Image_I* MandelBrotProvider::createImageGL(void)
     {
-    ColorRGB_01 colorTexte(0, 0, 0); // black
+    ColorRGB_01 colorTexte(1, 1, 1); // black
     return new ImageAnimable_RGBA_uchar4(createAnimable(), colorTexte);
     }
 

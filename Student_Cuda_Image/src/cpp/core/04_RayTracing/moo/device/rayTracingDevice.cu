@@ -18,7 +18,7 @@ using namespace gpu;
  |*		Public			*|
  \*-------------------------------------*/
 
-__global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
+__global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
 
 /*--------------------------------------*\
  |*		Private			*|
@@ -32,11 +32,11 @@ __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSp
  |*		Public			*|
  \*-------------------------------------*/
 
-__global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t)
+__global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t)
     {
-    RayTracingMath rayTracingMath = RayTracingMath(w, h,ptrDevTabSphere,nbSphere);
+    RayTracingMath rayTracingMath = RayTracingMath(w, h, ptrDevTabSphere, nbSphere);
 
-    const int WH=w*h;
+    const int WH = w * h;
     const int TID = Indice2D::tid();
     const int NB_THREAD = Indice2D::nbThread();
 
@@ -47,9 +47,7 @@ __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSp
     while (s < WH)
 	{
 	IndiceTools::toIJ(s, w, &i, &j); 	// update (i, j)
-
-	rayTracingMath.colorIJ(&ptrDevPixels[s],i, j, t); 	// update ptrDevPixels[s]
-
+	rayTracingMath.colorIJ(&ptrDevPixels[s], i, j, t); 	// update ptrDevPixels[s]
 	s += NB_THREAD;
 	}
     }

@@ -4,7 +4,6 @@
 #include "Device.h"
 #include "RayTracing.h"
 
-
 using std::cout;
 using std::endl;
 
@@ -47,7 +46,7 @@ RayTracing::RayTracing(const Grid& grid, uint w, uint h, float dt) :
     // Tools
     this->t = 0; // protected dans Animable
 
-    this->nbSphere = 5;
+    this->nbSphere = 4;
 
     this->sizeOctetSphere = nbSphere * sizeof(Sphere);
 

@@ -34,15 +34,15 @@
 Animable_I<uchar4>* RayTracingProvider::createAnimable()
     {
     // Animation;
-    float dt = 2 * PI / 1000;
+    float dt = 0;
 
     // Dimension
     int w = 16 * 32 * 2;
     int h = 16 * 32;
 
     // Grid Cuda
-    int mp=Device::getMPCount();
-    int coreMP=Device::getCoreCountMP();
+    int mp = Device::getMPCount();
+    int coreMP = Device::getCoreCountMP();
 
     dim3 dg = dim3(mp, 2, 1);  		// disons, a optimiser selon le gpu, peut drastiqument ameliorer ou baisser les performances
     dim3 db = dim3(coreMP, 2, 1);   	// disons, a optimiser selon le gpu, peut drastiqument ameliorer ou baisser les performances
@@ -56,7 +56,7 @@ Animable_I<uchar4>* RayTracingProvider::createAnimable()
  */
 Image_I* RayTracingProvider::createImageGL(void)
     {
-    ColorRGB_01 colorTexte(1, 0, 0); // red
+    ColorRGB_01 colorTexte(1, 1, 1); // red
     return new ImageAnimable_RGBA_uchar4(createAnimable(), colorTexte);
     }
 
