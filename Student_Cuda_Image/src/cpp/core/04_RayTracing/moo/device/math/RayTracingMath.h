@@ -28,9 +28,11 @@ class RayTracingMath
 	    {
 	    this->ptrDevTabSphere = ptrDevTabSphere;
 	    this->nbSphere = nbSphere;
+	    this->ptrNearestSphere = 0;
+	    this->ptrDevCurrentSphere = 0;
 	    }
 
-	__device__    virtual ~RayTracingMath()
+	__device__      virtual ~RayTracingMath()
 	    {
 	    // rien
 	    }
@@ -48,23 +50,21 @@ class RayTracingMath
 	    float2 xySol;
 	    xySol.x = i;
 	    xySol.y = j;
-	    float distance = 0;
-	    float dz = 0;
-	    bool isBlack = true;
+	    float distance = 9999999.f;
+	    float dz = 0.f;
 
 	    //Loop in sphere array
-	    for (int a = 0; a < nbSphere; a++)
+	    for (int index = 0; index < nbSphere; index++)
 		{
-		ptrDevCurrentSphere = &ptrDevTabSphere[a];
+		ptrDevCurrentSphere = &ptrDevTabSphere[index];
 		float hCarree = ptrDevCurrentSphere->hCarre(xySol);
 
 		if (ptrDevCurrentSphere->isEnDessous(hCarree))
 		    {
-		    isBlack = false;
 		    float dzCurrent = ptrDevCurrentSphere->dz(hCarree);
 		    float distanceCurrent = ptrDevCurrentSphere->distance(dzCurrent);
 
-		    if (distanceCurrent < distance || a == 0)
+		    if (distanceCurrent < distance)
 			{
 			dz = dzCurrent;
 			distance = distanceCurrent;
@@ -74,19 +74,11 @@ class RayTracingMath
 		}
 
 	    //Color the pixel with the color of the nearest sphere
-	    colorPixel(t, dz, ptrColor, isBlack);
-	    }
-
-    private:
-	__device__
-	void colorPixel(float t, float dz, uchar4* ptrColor, bool isBlack)
-	    {
-	    if (!isBlack)
+	    if (ptrNearestSphere)
 		{
 		float brightness = ptrNearestSphere->brightness(dz);
-		float h = ptrNearestSphere->getHueStart() + ptrNearestSphere->hue(t);
+		float h = ptrNearestSphere->hue(t);
 		ColorTools::HSB_TO_RVB(h, 1, brightness, ptrColor);
-		//ColorTools::HSB_TO_RVB(h, 1, brightness, ptrColor);
 		}
 	    else
 		{

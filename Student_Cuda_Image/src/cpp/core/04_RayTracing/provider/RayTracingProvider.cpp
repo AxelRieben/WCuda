@@ -37,8 +37,8 @@ Animable_I<uchar4>* RayTracingProvider::createAnimable()
     float dt = 0;
 
     // Dimension
-    int w = 16 * 32 * 2;
-    int h = 16 * 32;
+    int w = 16 * 48;
+    int h = 16 * 48;
 
     // Grid Cuda
     int mp = Device::getMPCount();

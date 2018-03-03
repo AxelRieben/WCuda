@@ -46,7 +46,7 @@ RayTracing::RayTracing(const Grid& grid, uint w, uint h, float dt) :
     // Tools
     this->t = 0; // protected dans Animable
 
-    this->nbSphere = 4;
+    this->nbSphere = 40;
 
     this->sizeOctetSphere = nbSphere * sizeof(Sphere);
 
