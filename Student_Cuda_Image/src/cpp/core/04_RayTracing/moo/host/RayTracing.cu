@@ -3,6 +3,7 @@
 
 #include "Device.h"
 #include "RayTracing.h"
+#include "length_cm.h"
 
 using std::cout;
 using std::endl;
@@ -16,6 +17,7 @@ using std::endl;
  \*-------------------------------------*/
 
 extern __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
+extern void uploadToCM(Sphere* ptrTabSphere);
 
 /*--------------------------------------*\
  |*		Public			*|
@@ -24,6 +26,8 @@ extern __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,i
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
+
+__host__ void fillCM(Sphere* ptrTabSphere);
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -46,16 +50,18 @@ RayTracing::RayTracing(const Grid& grid, uint w, uint h, float dt) :
     // Tools
     this->t = 0; // protected dans Animable
 
-    this->nbSphere = 40;
-
-    this->sizeOctetSphere = nbSphere * sizeof(Sphere);
-
-    SphereCreator* creator = new SphereCreator(nbSphere, w, h);
-
+    // Fabrication coté host des données
+    SphereCreator* creator = new SphereCreator(LENGTH_CM, w, h);
     Sphere* ptrTabSphere = creator->getTabSphere();
 
-    Device::malloc(&ptrDevTabSphere, sizeOctetSphere);
-    Device::memcpyHToD(ptrDevTabSphere, ptrTabSphere, sizeOctetSphere);
+    this->nbSphere = 40;
+    //SphereCreator* creator = new SphereCreator(nbSphere, w, h);
+    //Sphere* ptrTabSphere = creator->getTabSphere();
+    //this->sizeOctetSphere = nbSphere * sizeof(Sphere);
+    //Device::malloc(&ptrDevTabSphere, sizeOctetSphere);
+    //Device::memcpyHToD(ptrDevTabSphere, ptrTabSphere, sizeOctetSphere);
+
+    fillCM(ptrTabSphere);
 
     }
 
@@ -67,6 +73,12 @@ RayTracing::~RayTracing()
 /*-------------------------*\
  |*	Methode		    *|
  \*-------------------------*/
+
+__host__ void fillCM(Sphere* ptrTabSphere)
+    {
+// Appelle le service d'upload coté device
+    uploadToCM(ptrTabSphere);
+    }
 
 /**
  * Override

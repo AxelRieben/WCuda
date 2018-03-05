@@ -4,11 +4,15 @@
 #include "RayTracingMath.h"
 
 #include "IndiceTools_GPU.h"
+#include "length_cm.h"
 using namespace gpu;
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
+
+// Déclaration Constante globale
+__constant__ Sphere TAB_CM[LENGTH_CM];
 
 /*--------------------------------------*\
  |*		Imported	 	*|
@@ -24,6 +28,8 @@ __global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nb
  |*		Private			*|
  \*-------------------------------------*/
 
+__device__ void work(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
+
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
  \*---------------------------------------------------------------------*/
@@ -32,7 +38,24 @@ __global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nb
  |*		Public			*|
  \*-------------------------------------*/
 
+__host__ void uploadToCM(Sphere* ptrTabSphere)
+    {
+    size_t size = LENGTH_CM * sizeof(Sphere);
+    int offset = 0;
+    HANDLE_ERROR(cudaMemcpyToSymbol(TAB_CM, ptrTabSphere, size, offset, cudaMemcpyHostToDevice));
+    //Device::memcpyToCM(TAB_CM, ptrTabSphere, size);
+    }
+
 __global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t)
+    {
+    work(ptrDevPixels, TAB_CM, LENGTH_CM, w, h, t);
+    }
+
+/*--------------------------------------*\
+ |*		Private			*|
+ \*-------------------------------------*/
+
+__device__ void work(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t)
     {
     RayTracingMath rayTracingMath = RayTracingMath(w, h, ptrDevTabSphere, nbSphere);
 
@@ -51,10 +74,6 @@ __global__ void rayTracing(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nb
 	s += NB_THREAD;
 	}
     }
-
-/*--------------------------------------*\
- |*		Private			*|
- \*-------------------------------------*/
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
