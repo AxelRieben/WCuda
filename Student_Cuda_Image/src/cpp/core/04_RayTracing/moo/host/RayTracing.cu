@@ -16,7 +16,9 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern __global__ void rayTracing(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
+extern __global__ void rayTracingSM(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
+extern __global__ void rayTracingCM(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
+
 extern void uploadToCM(Sphere* ptrTabSphere);
 
 /*--------------------------------------*\
@@ -26,8 +28,6 @@ extern void uploadToCM(Sphere* ptrTabSphere);
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-__host__ void fillCM(Sphere* ptrTabSphere);
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -50,19 +50,18 @@ RayTracing::RayTracing(const Grid& grid, uint w, uint h, float dt) :
     // Tools
     this->t = 0; // protected dans Animable
 
+    this->nbSphere = LENGTH_CM;
+
     // Fabrication coté host des données
-    SphereCreator* creator = new SphereCreator(LENGTH_CM, w, h);
+    SphereCreator* creator = new SphereCreator(nbSphere, w, h);
     Sphere* ptrTabSphere = creator->getTabSphere();
+    this->ptrDevTabSphere = 0;
 
-    this->nbSphere = 40;
-    //SphereCreator* creator = new SphereCreator(nbSphere, w, h);
-    //Sphere* ptrTabSphere = creator->getTabSphere();
-    //this->sizeOctetSphere = nbSphere * sizeof(Sphere);
-    //Device::malloc(&ptrDevTabSphere, sizeOctetSphere);
-    //Device::memcpyHToD(ptrDevTabSphere, ptrTabSphere, sizeOctetSphere);
+    //Global Memory
+    fillGM(ptrTabSphere);
 
-    fillCM(ptrTabSphere);
-
+    //Constant Memory
+    //fillCM(ptrTabSphere);
     }
 
 RayTracing::~RayTracing()
@@ -74,10 +73,17 @@ RayTracing::~RayTracing()
  |*	Methode		    *|
  \*-------------------------*/
 
-__host__ void fillCM(Sphere* ptrTabSphere)
+__host__ void RayTracing::fillCM(Sphere* ptrTabSphere)
     {
 // Appelle le service d'upload coté device
     uploadToCM(ptrTabSphere);
+    }
+
+__host__ void RayTracing::fillGM(Sphere* ptrTabSphere)
+    {
+    this->sizeOctetSphere = this->nbSphere * sizeof(Sphere);
+    Device::malloc(&ptrDevTabSphere, sizeOctetSphere);
+    Device::memcpyHToD(ptrDevTabSphere, ptrTabSphere, sizeOctetSphere);
     }
 
 /**
@@ -90,7 +96,15 @@ void RayTracing::process(uchar4* ptrDevPixels, uint w, uint h, const DomaineMath
     {
     Device::lastCudaError("RayTracing rgba uchar4 (before)"); // facultatif, for debug only, remove for release
 
-    rayTracing<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
+    //Global Memory
+    //rayTracing<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
+
+    //Constant Memory
+    //rayTracingCM<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
+
+    //Shared Memory
+    size_t sizeOctetSM = nbSphere * sizeof(Sphere);
+    rayTracingSM<<<dg,db, sizeOctetSM>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
 
     Device::lastCudaError("RayTracing rgba uchar4 (after)"); // facultatif, for debug only, remove for release
     }

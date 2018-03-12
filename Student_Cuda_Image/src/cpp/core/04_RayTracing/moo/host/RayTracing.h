@@ -31,6 +31,11 @@ class RayTracing: public Animable_I<uchar4>
 	 |*		Methodes		*|
 	 \*-------------------------------------*/
 
+    private:
+
+	__host__ void fillCM(Sphere* ptrTabSphere);
+	__host__ void fillGM(Sphere* ptrTabSphere);
+
     public:
 
 	/*-------------------------*\
