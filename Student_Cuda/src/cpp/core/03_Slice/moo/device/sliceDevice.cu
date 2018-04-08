@@ -1,33 +1,22 @@
-#include <iostream>
-#include <stdlib.h>
+#include "Indice2D.h"
+#include "Indice1D.h"
+#include "cudaTools.h"
 
-
-using std::cout;
-using std::endl;
+#include <stdio.h>
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void sliceDevice(float* ptrTabGM, int n);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -37,24 +26,29 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+__global__ void sliceDevice(float* ptrTabGM, int n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    isOk &= useAddVecteur();
-    isOk &= useSlice();
+    const int NB_THREAD = Indice2D::nbThread();
+    const int TID = Indice2D::tid();
+    int s = TID;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    const double DX = 1 / (double) n;
+    double sommeThread = 0;
+    double xs = 0;
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    while (s < n)
+	{
+	xs = s * DX;
+	sommeThread += 4 / (1 + xs * xs);
+	s += NB_THREAD;
+	}
+
+    ptrTabGM[TID] = sommeThread;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

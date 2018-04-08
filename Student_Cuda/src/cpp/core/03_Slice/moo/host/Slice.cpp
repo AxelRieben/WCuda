@@ -1,33 +1,19 @@
-#include <iostream>
-#include <stdlib.h>
-
-
-using std::cout;
-using std::endl;
+#include "Slice.h"
+#include "Device.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void sliceDevice(float* ptrTabGM, int n);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -37,24 +23,62 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+Slice::Slice(Grid& grid, int n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    isOk &= useAddVecteur();
-    isOk &= useSlice();
+    this->grid = grid;
+    this->n = n;
+    this->pi = 0;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    ptrTab = new float[n];
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    this->sizeTab = n * sizeof(float);
+    Device::malloc(&ptrTabGM, sizeTab);
+    Device::memcpyHToD(ptrTabGM, ptrTab, sizeTab);
+    }
+
+Slice::~Slice()
+    {
+    Device::free(ptrTabGM);
+    delete[] ptrTab;
+    }
+
+void Slice::run()
+    {
+    Device::lastCudaError("Slice (before)");
+
+    dim3 dg = grid.dg;
+    dim3 db = grid.db;
+
+    sliceDevice<<<dg,db>>>(ptrTabGM,n);
+
+    Device::lastCudaError("Slice (after)");
+
+    Device::memcpyDToH(ptrTab, ptrTabGM, sizeTab);
+
+    reduceTab();
+    }
+
+float Slice::getPI()
+    {
+    return this->pi;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
 
+void Slice::reduceTab()
+    {
+    float sum = 0;
 
+#pragma omp parallel for reduction(+:sum)
+    for (int i = 0; i < n; i++)
+	{
+	sum += ptrTab[i];
+	}
+
+    this->pi = sum * (1 / (double) n);
+    }
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
