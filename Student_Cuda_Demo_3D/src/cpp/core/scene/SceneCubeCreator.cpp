@@ -3,6 +3,8 @@
 #include "SceneCubeCreator.h"
 
 #include "RipplingProvider.h"
+#include "MandelBrotProvider.h"
+#include "RayTracingProvider.h"
 
 
 /*----------------------------------------------------------------------*\
@@ -51,12 +53,12 @@ SceneCube* SceneCubeCreator::getScene()
 void SceneCubeCreator::createImages()
     {
     ptrImage1 = RipplingProvider().createImageGL();
-    ptrImage2 = RipplingProvider().createImageGL();
+    ptrImage2 = MandelBrotProvider().createImageGL();
 
-    ptrImage3 = RipplingProvider().createImageGL();
-    ptrImage4 = RipplingProvider().createImageGL();
-    ptrImage5 = RipplingProvider().createImageGL(); //ko, FIXME JST shader
-    ptrImage6 = RipplingProvider().createImageGL(); // ko, FIXME JST shader
+    ptrImage3 = RayTracingProvider().createImageGL();
+    ptrImage4 = MandelBrotProvider().createImageGL();
+    ptrImage5 = MandelBrotProvider().createImageGL(); //ko, FIXME JST shader
+    ptrImage6 = MandelBrotProvider().createImageGL(); // ko, FIXME JST shader
     }
 
 void SceneCubeCreator::createScene()

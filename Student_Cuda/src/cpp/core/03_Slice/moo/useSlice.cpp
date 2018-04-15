@@ -2,6 +2,7 @@
 #include "Grid.h"
 #include "Device.h"
 #include <cmath>
+#include <limits.h>
 
 using std::cout;
 using std::endl;
@@ -36,7 +37,7 @@ bool useSlice(void);
 
 bool useSlice()
     {
-    int n = 9;
+    int n = INT_MAX / 10;
     const float EPSILON = 0.000001;
 
     // Grid cuda

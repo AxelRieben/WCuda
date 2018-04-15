@@ -8,6 +8,8 @@
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
+__device__ double fpi(double x);
+
 /*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
@@ -39,7 +41,7 @@ __global__ void sliceDevice(float* ptrTabGM, int n)
     while (s < n)
 	{
 	xs = s * DX;
-	sommeThread += 4 / (1 + xs * xs);
+	sommeThread += fpi(xs);
 	s += NB_THREAD;
 	}
 
@@ -49,6 +51,11 @@ __global__ void sliceDevice(float* ptrTabGM, int n)
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
+
+__device__ double fpi(double x)
+    {
+    return 4 / (1 + x * x);
+    }
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
