@@ -1,35 +1,22 @@
-#include <iostream>
-#include <stdlib.h>
-
-
-using std::cout;
-using std::endl;
+#include "Indice1D.h"
+#include "cudaTools.h"
+#include "reductionADD.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
-/*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
+__device__ float f(float x);
 
 /*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void montecarloDevice(float* ptrResultGM, int n);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,25 +26,45 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+
+__global__ void montecarloDevice(float* ptrResultGM, int n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
+    //Shared Memory
+    __shared__ extern float tabSM[];
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    const int NB_THREAD = Indice1D::nbThread();
+    //const int NB_THREAD_BLOCK = Indice1D::nbThreadBlock();
+    const int TID = Indice1D::tid();
+    const int TID_LOCAL = Indice1D::tidLocal();
+    int s = TID;
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    const float DX = 1 / (float) n;
+    float sommeThread = 0;
+    float xs = 0;
+
+    while (s < n)
+	{
+	xs = s * DX;
+	sommeThread += f(xs);
+	s += NB_THREAD;
+	}
+
+    tabSM[TID_LOCAL] = sommeThread;
+
+    __syncthreads();
+
+    reductionADD(tabSM, ptrResultGM);
+
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
 
-
+__device__ float f(float x)
+    {
+    return sqrt(1-x*x);
+    }
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

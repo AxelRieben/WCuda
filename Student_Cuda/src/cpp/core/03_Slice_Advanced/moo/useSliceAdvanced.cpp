@@ -1,6 +1,8 @@
 #include <iostream>
-#include <stdlib.h>
-
+#include "Grid.h"
+#include "Device.h"
+#include <cmath>
+#include <limits.h>
 
 using std::cout;
 using std::endl;
@@ -13,23 +15,17 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
+#include "SliceAdvanced.h"
 
 /*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+bool useSliceAdvanced(void);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,25 +35,27 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+bool useSliceAdvanced()
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
+    int n = INT_MAX / 10;
+    const float EPSILON = 0.00001;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    dim3 dg = dim3(1, 1, 1);
+    dim3 db = dim3(512, 1, 1); //Utiliser soit 128, 256, 512 ou 1024 selon hypothèses
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    Grid grid(dg, db);
+
+    SliceAdvanced sliceAdvanced(grid, n);
+    sliceAdvanced.run();
+
+    bool isOk = abs(sliceAdvanced.getPI() - M_PI) < EPSILON;
+
+    return isOk;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

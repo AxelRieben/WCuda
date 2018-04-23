@@ -1,35 +1,20 @@
-#include <iostream>
-#include <stdlib.h>
-
-
-using std::cout;
-using std::endl;
+#include "Device.h"
+#include "SliceAdvanced.h"
+#include "cudaTools.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void sliceAdvancedDevice(float* ptrResultGM, int n);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,25 +24,45 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+SliceAdvanced::SliceAdvanced(Grid& grid, int n) :
+	grid(grid), n(n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
+    this->pi = 0;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    this->sizeTabSM = grid.threadCounts() * sizeof(float);
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    Device::malloc(&ptrResultGM, sizeof(float)); //resultat
+    Device::memclear(ptrResultGM, sizeof(float));
+
+    Device::lastCudaError("MM (end allocation)"); // temp debug, facultatif
+    }
+
+SliceAdvanced::~SliceAdvanced()
+    {
+    Device::free(ptrResultGM);
+    }
+
+void SliceAdvanced::run()
+    {
+    Device::lastCudaError("Slice (before)");
+
+    sliceAdvancedDevice<<<grid.dg,grid.db,sizeTabSM>>>(ptrResultGM,n);
+
+    Device::lastCudaError("Slice (after)");
+
+    Device::memcpyDToH(&pi, ptrResultGM, sizeof(float));
+
+    this->pi = this->pi / n;
+    }
+
+float SliceAdvanced::getPI()
+    {
+    return this->pi;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

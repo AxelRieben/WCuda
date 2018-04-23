@@ -1,6 +1,7 @@
 #include <iostream>
-#include <stdlib.h>
-
+#include "VectorTools.h"
+#include "Grid.h"
+#include "Device.h"
 
 using std::cout;
 using std::endl;
@@ -13,23 +14,17 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
+#include "Montecarlo.h"
 
 /*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+bool useMontecarlo(void);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,25 +34,31 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+bool useMontecarlo()
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
+    int n = 9;
+    const float EPSILON = 0.000001;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    // Grid cuda
+    int mp = Device::getMPCount();
+    int coreMP = Device::getCoreCountMP();
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    dim3 dg = dim3(n, 1, 1);
+    dim3 db = dim3(1, 1, 1);
+
+    Grid grid(dg, db);
+
+    Montecarlo montecarlo(grid, n);
+    montecarlo.run();
+
+    bool isOk = abs(montecarlo.getPI() - M_PI) < EPSILON;
+
+    return isOk;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

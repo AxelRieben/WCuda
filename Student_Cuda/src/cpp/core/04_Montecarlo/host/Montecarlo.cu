@@ -1,35 +1,21 @@
-#include <iostream>
-#include <stdlib.h>
+#include "Montecarlo.h"
 
-
-using std::cout;
-using std::endl;
+#include "Device.h"
+#include "cudaTools.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void montecarloDevice(float* ptrResultGM, int n);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,25 +25,48 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+Montecarlo::Montecarlo(Grid& grid, int n) :
+	grid(grid), n(n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
+    this->pi = 0;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    ptrResult = 0;
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    this->sizeTabSM = n * sizeof(float);
+
+    Device::malloc(&ptrResultGM, sizeof(float)); //resultat
+    Device::memclear(ptrResultGM, sizeof(float));
+    }
+
+Montecarlo::~Montecarlo()
+    {
+    Device::free(ptrResultGM);
+    }
+
+void Montecarlo::run()
+    {
+    Device::lastCudaError("Slice (before)");
+
+    dim3 dg = grid.dg;
+    dim3 db = grid.db;
+
+    montecarloDevice<<<dg,db,sizeTabSM>>>(ptrResultGM,n);
+
+    Device::lastCudaError("Slice (after)");
+
+    Device::memcpyDToH(ptrResult, ptrResultGM, sizeof(float));
+
+    this->pi = *ptrResult;
+    }
+
+float Montecarlo::getPI()
+    {
+    return this->pi;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
