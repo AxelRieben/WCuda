@@ -1,35 +1,20 @@
-#include <iostream>
-#include <stdlib.h>
-
-
-using std::cout;
-using std::endl;
+#include <curand_kernel.h>
+#include <limits.h>
+#include <Indice1D.h>
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+__global__ void createGenerator(curandState* tabDevGeneratorGM, int deviceId);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -39,26 +24,25 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+// Each thread gets same seed, a different sequence number
+// no offset
+__global__
+void createGenerator(curandState* tabDevGeneratorGM, int deviceId)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    //isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
-    isOk &= useMontecarlo();
+    const int TID = Indice1D::tid();
+    int deltaSeed = deviceId * INT_MAX / 10000;
+    int deltaSequence = deviceId * 100;
+    int deltaOffset = deviceId * 100;
+    int seed = 1234 + deltaSeed;
+    int sequenceNumber = TID + deltaSequence;
+    int offset = deltaOffset;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
-
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    curand_init(seed, sequenceNumber, offset, &tabDevGeneratorGM[TID]);
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

@@ -36,15 +36,15 @@ bool useMontecarlo(void);
 
 bool useMontecarlo()
     {
-    int n = 9;
-    const float EPSILON = 0.000001;
+    int n = INT_MAX/1000;
+    const float EPSILON = 0.001;
 
     // Grid cuda
     int mp = Device::getMPCount();
     int coreMP = Device::getCoreCountMP();
 
-    dim3 dg = dim3(n, 1, 1);
-    dim3 db = dim3(1, 1, 1);
+    dim3 dg = dim3(1, 1, 1);
+    dim3 db = dim3(512, 1, 1);
 
     Grid grid(dg, db);
 

@@ -1,5 +1,4 @@
 #include "Montecarlo.h"
-
 #include "Device.h"
 #include "cudaTools.h"
 
@@ -11,7 +10,8 @@
  |*		Public			*|
  \*-------------------------------------*/
 
-__global__ void montecarloDevice(float* ptrResultGM, int n);
+__global__ void montecarloDevice(float* ptrResultGM, int n, curandState* tabDevGeneratorGM);
+__global__ void createGenerator(curandState* tabDevGeneratorGM, int deviceId);
 
 /*--------------------------------------*\
  |*		Private			*|
@@ -30,17 +30,23 @@ Montecarlo::Montecarlo(Grid& grid, int n) :
     {
     this->pi = 0;
 
-    ptrResult = 0;
+    tabDevGenerator = new curandState[grid.threadCounts()];
 
-    this->sizeTabSM = n * sizeof(float);
+    this->sizeTabSM = grid.threadCounts() * sizeof(float);
+    this->sizeTabGenerator = grid.threadCounts() * sizeof(curandState);
 
-    Device::malloc(&ptrResultGM, sizeof(float)); //resultat
+    Device::malloc(&ptrResultGM, sizeof(float));
     Device::memclear(ptrResultGM, sizeof(float));
+
+    Device::malloc(&tabDevGeneratorGM, sizeTabGenerator);
+    Device::memclear(tabDevGeneratorGM, sizeTabGenerator);
     }
 
 Montecarlo::~Montecarlo()
     {
     Device::free(ptrResultGM);
+    Device::free(tabDevGeneratorGM);
+    delete[] tabDevGenerator;
     }
 
 void Montecarlo::run()
@@ -50,13 +56,18 @@ void Montecarlo::run()
     dim3 dg = grid.dg;
     dim3 db = grid.db;
 
-    montecarloDevice<<<dg,db,sizeTabSM>>>(ptrResultGM,n);
+    createGenerator<<<dg, db>>>(tabDevGeneratorGM, 0);
+
+    Device::memcpyDToH(tabDevGenerator, tabDevGeneratorGM, sizeof(float));
+
+    int nPerThread = n / grid.threadCounts();
+    montecarloDevice<<<dg,db,sizeTabSM>>>(ptrResultGM,nPerThread,tabDevGeneratorGM);
 
     Device::lastCudaError("Slice (after)");
 
-    Device::memcpyDToH(ptrResult, ptrResultGM, sizeof(float));
+    Device::memcpyDToH(&pi, ptrResultGM, sizeof(float));
 
-    this->pi = *ptrResult;
+    this->pi = 2 * 4 * pi / n;
     }
 
 float Montecarlo::getPI()

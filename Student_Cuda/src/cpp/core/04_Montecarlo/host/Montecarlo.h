@@ -3,6 +3,7 @@
 #include "cudaTools.h"
 #include "MathTools.h"
 #include "Grid.h"
+#include <curand_kernel.h>
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
@@ -32,8 +33,10 @@ class Montecarlo
 	float pi;
 
 	//Tools
+	size_t sizeTabGenerator;
+	curandState* tabDevGeneratorGM;
+	curandState* tabDevGenerator;
 	float* ptrResultGM;
-	float* ptrResult;
 	size_t sizeTabSM;
     };
 
