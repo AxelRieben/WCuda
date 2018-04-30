@@ -1,36 +1,16 @@
-#include <iostream>
-#include <stdlib.h>
-
-
-using std::cout;
-using std::endl;
+#include "MontecarloMultiGPU.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
  \*---------------------------------------------------------------------*/
 
 /*--------------------------------------*\
- |*		Imported	 	*|
- \*-------------------------------------*/
-
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
-extern bool useMontecarloMulti(void);
-
-/*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
-
-int mainCore();
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -40,27 +20,44 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+MontecarloMultiGPU::MontecarloMultiGPU(Grid& grid, int n) :
+	grid(grid), n(n)
     {
-    bool isOk = true;
-    isOk &= useHello();
-    isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
-    isOk &= useMontecarlo();
-    isOk &= useMontecarloMulti();
+    this->pi = 0;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    }
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+MontecarloMultiGPU::~MontecarloMultiGPU()
+    {
+
+    }
+
+void MontecarloMultiGPU::run()
+    {
+    int n0 = 0;
+    int nGPU = n / Device::getDeviceCount();
+    int nTotEffectif = nGPU * Device::getDeviceCount();
+
+#pragma omp parallel for reduction(+:n0)
+    for (int deviceId = 0; deviceId < Device::getDeviceCount(); deviceId++)
+	{
+	Device::setDevice(deviceId);
+	Montecarlo montecarlo(grid, nGPU);
+	montecarlo.run();
+	n0 += montecarlo.getN0();
+	}
+
+    this->pi = 2 * 4 * n0 / (float) nTotEffectif;
+    }
+
+float MontecarloMultiGPU::getPI()
+    {
+    return this->pi;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			End	 					*|

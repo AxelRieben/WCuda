@@ -3,6 +3,7 @@
 #include "Device.h"
 #include <cmath>
 #include <limits.h>
+#include "MathTools.h"
 
 using std::cout;
 using std::endl;
@@ -38,7 +39,7 @@ bool useSlice(void);
 bool useSlice()
     {
     int n = INT_MAX / 10;
-    const float EPSILON = 0.000001;
+    const float EPSILON = 0.0001;
 
     // Grid cuda
     int mp = Device::getMPCount();
@@ -52,8 +53,9 @@ bool useSlice()
     Slice slice(grid, n);
     slice.run();
 
-    bool isOk = abs(slice.getPI() - M_PI) < EPSILON;
-
+    printf("Slice : %f \n", slice.getPI());
+    bool isOk = MathTools::isEquals(slice.getPI(), (float) PI, EPSILON);
+    printf("Result : %s \n", isOk ? "OK" : "KO");
     return isOk;
     }
 

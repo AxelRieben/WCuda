@@ -1,6 +1,7 @@
-#include <iostream>
-#include <stdlib.h>
-
+#include "VectorTools.h"
+#include "Grid.h"
+#include "Device.h"
+#include "MathTools.h"
 
 using std::cout;
 using std::endl;
@@ -13,24 +14,17 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
-extern bool useHello(void);
-extern bool useAddVecteur(void);
-extern bool useSlice(void);
-extern bool useSliceAdvanced(void);
-extern bool useMontecarlo(void);
-extern bool useMontecarloMulti(void);
+#include "MontecarloMultiGPU.h"
 
 /*--------------------------------------*\
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore();
+bool useMontecarloMulti(void);
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
-
-
 
 /*----------------------------------------------------------------------*\
  |*			Implementation 					*|
@@ -40,29 +34,32 @@ int mainCore();
  |*		Public			*|
  \*-------------------------------------*/
 
-int mainCore()
+bool useMontecarloMulti()
     {
-    bool isOk = true;
-    isOk &= useHello();
-    isOk &= useAddVecteur();
-    isOk &= useSlice();
-    isOk &= useSliceAdvanced();
-    isOk &= useMontecarlo();
-    isOk &= useMontecarloMulti();
+    int n = INT_MAX/10;
+    const float EPSILON = 0.001;
 
-    cout << "\nisOK = " << isOk << endl;
-    cout << "\nEnd : mainCore" << endl;
+    // Grid cuda
+    dim3 dg = dim3(1, 1, 1);
+    dim3 db = dim3(512, 1, 1);
 
-    return isOk ? EXIT_SUCCESS : EXIT_FAILURE;
+    Grid grid(dg, db);
+
+    MontecarloMultiGPU montecarlomulti(grid, n);
+    montecarlomulti.run();
+
+    printf("MontecarloMulti : %f \n", montecarlomulti.getPI());
+    bool isOk = MathTools::isEquals(montecarlomulti.getPI(), (float) PI, EPSILON);
+    printf("Result : %s \n", isOk ? "OK" : "KO");
+    return isOk;
     }
 
 /*--------------------------------------*\
  |*		Private			*|
  \*-------------------------------------*/
 
-
-
 /*----------------------------------------------------------------------*\
  |*			End	 					*|
  \*---------------------------------------------------------------------*/
+
 

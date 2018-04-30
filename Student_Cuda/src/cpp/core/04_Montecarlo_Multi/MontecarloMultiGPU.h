@@ -1,9 +1,11 @@
-#ifndef SRC_CPP_CORE_03_SLICE_MOO_HOST_SLICE_H_
-#define SRC_CPP_CORE_03_SLICE_MOO_HOST_SLICE_H_
+#ifndef SRC_CPP_CORE_04_MONTECARLO_MULTI_MONTECARLOMULTIGPU_H_
+#define SRC_CPP_CORE_04_MONTECARLO_MULTI_MONTECARLOMULTIGPU_H_
+
 #include "cudaTools.h"
 #include "MathTools.h"
 #include "Grid.h"
-#include <curand_kernel.h>
+#include "Device.h"
+#include "Montecarlo.h"
 
 /*----------------------------------------------------------------------*\
  |*			Declaration 					*|
@@ -13,32 +15,22 @@
  |*		Public			*|
  \*-------------------------------------*/
 
-class Montecarlo
+class MontecarloMultiGPU
     {
     public:
-	Montecarlo(Grid& grid, int n);
-	~Montecarlo();
+	MontecarloMultiGPU(Grid& grid, int n);
+	~MontecarloMultiGPU();
 
 	void run();
 	float getPI();
-	int getN0();
 
     private:
-
 	//Input
-	int n;
 	Grid grid;
+	int n;
 
 	//Output
 	float pi;
-	int n0;
-
-	//Tools
-	size_t sizeTabGenerator;
-	curandState* tabDevGeneratorGM;
-	curandState* tabDevGenerator;
-	float* ptrResultGM;
-	size_t sizeTabSM;
     };
 
 #endif 

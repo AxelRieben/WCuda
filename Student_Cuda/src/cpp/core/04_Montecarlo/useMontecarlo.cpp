@@ -2,6 +2,8 @@
 #include "VectorTools.h"
 #include "Grid.h"
 #include "Device.h"
+#include "MathTools.h"
+#include <cmath>
 
 using std::cout;
 using std::endl;
@@ -36,7 +38,7 @@ bool useMontecarlo(void);
 
 bool useMontecarlo()
     {
-    int n = INT_MAX/1000;
+    int n = INT_MAX / 10;
     const float EPSILON = 0.001;
 
     // Grid cuda
@@ -51,8 +53,9 @@ bool useMontecarlo()
     Montecarlo montecarlo(grid, n);
     montecarlo.run();
 
-    bool isOk = abs(montecarlo.getPI() - M_PI) < EPSILON;
-
+    printf("Montecarlo : %f \n", montecarlo.getPI());
+    bool isOk = MathTools::isEquals(montecarlo.getPI(), (float) PI, EPSILON);
+    printf("Result : %s \n", isOk ? "OK" : "KO");
     return isOk;
     }
 

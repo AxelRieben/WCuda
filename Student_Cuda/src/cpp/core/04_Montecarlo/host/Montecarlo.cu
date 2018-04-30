@@ -29,6 +29,7 @@ Montecarlo::Montecarlo(Grid& grid, int n) :
 	grid(grid), n(n)
     {
     this->pi = 0;
+    this->n0 = 0;
 
     tabDevGenerator = new curandState[grid.threadCounts()];
 
@@ -67,12 +68,18 @@ void Montecarlo::run()
 
     Device::memcpyDToH(&pi, ptrResultGM, sizeof(float));
 
-    this->pi = 2 * 4 * pi / n;
+    this->n0 = pi;
+    this->pi = 2 * 4 * n0 / (float) n;
     }
 
 float Montecarlo::getPI()
     {
     return this->pi;
+    }
+
+int Montecarlo::getN0()
+    {
+    return this->n0;
     }
 
 /*--------------------------------------*\
