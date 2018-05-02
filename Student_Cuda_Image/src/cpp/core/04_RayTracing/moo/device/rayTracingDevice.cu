@@ -22,6 +22,8 @@ __constant__ Sphere TAB_CM[LENGTH_CM];
  |*		Public			*|
  \*-------------------------------------*/
 
+__global__ void rayTracingGM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
+
 __global__ void rayTracingSM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
 
 __global__ void rayTracingCM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
@@ -63,6 +65,11 @@ __global__ void rayTracingCM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int 
     {
     //Constant memory
     work(ptrDevPixels, TAB_CM, LENGTH_CM, w, h, t);
+    }
+
+__global__ void rayTracingGM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t)
+    {
+    work(ptrDevPixels, ptrDevTabSphere, LENGTH_CM, w, h, t);
     }
 
 /*--------------------------------------*\

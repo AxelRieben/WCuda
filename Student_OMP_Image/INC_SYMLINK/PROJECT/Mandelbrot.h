@@ -1,1 +1,1 @@
-/home/arc22/CUDA/toStudent/code/WCuda/Student_OMP_Image//src/core/02_Mandelbrot_Julia/a_animable/Mandelbrot.h
+/home/arc22/CUDA/toStudent/code/WCuda/Student_OMP_Image/src/core/02_Mandelbrot_Julia/a_animable/Mandelbrot.h

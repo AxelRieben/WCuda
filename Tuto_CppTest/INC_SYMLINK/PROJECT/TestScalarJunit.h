@@ -1,1 +1,1 @@
-/home/arc22/CUDA/toStudent/code/WCuda/Tuto_CppTest//src/cpp/test/junit/TestScalarJunit.h
+/home/arc22/CUDA/toStudent/code/WCuda/Tuto_CppTest/src/cpp/test/junit/TestScalarJunit.h

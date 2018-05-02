@@ -4,6 +4,9 @@
 
 #include "RipplingProvider.h"
 #include "MandelBrotProvider.h"
+#include "MandelBrotProvider2.h"
+#include "MandelBrotProvider3.h"
+#include "MandelBrotProvider4.h"
 #include "RayTracingProvider.h"
 
 
@@ -56,9 +59,9 @@ void SceneCubeCreator::createImages()
     ptrImage2 = MandelBrotProvider().createImageGL();
 
     ptrImage3 = RayTracingProvider().createImageGL();
-    ptrImage4 = MandelBrotProvider().createImageGL();
-    ptrImage5 = MandelBrotProvider().createImageGL(); //ko, FIXME JST shader
-    ptrImage6 = MandelBrotProvider().createImageGL(); // ko, FIXME JST shader
+    ptrImage4 = MandelBrotProvider2().createImageGL();
+    ptrImage5 = MandelBrotProvider3().createImageGL();
+    ptrImage6 = MandelBrotProvider4().createImageGL();
     }
 
 void SceneCubeCreator::createScene()

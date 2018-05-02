@@ -1,0 +1,1 @@
+/home/arc22/CUDA/toStudent/code/WCuda/Tuto_Cpp_Exercices/src/cpp/core/exercice1/Quadratique.h

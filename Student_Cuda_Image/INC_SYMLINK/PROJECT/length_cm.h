@@ -1,1 +1,1 @@
-/home/arc22/CUDA/toStudent/code/WCuda/Student_Cuda_Image//src/cpp/core/04_RayTracing/moo/tools/length_cm.h
+/home/arc22/CUDA/toStudent/code/WCuda/Student_Cuda_Image/src/cpp/core/04_RayTracing/moo/tools/length_cm.h

@@ -16,6 +16,7 @@ using std::endl;
  |*		Imported	 	*|
  \*-------------------------------------*/
 
+extern __global__ void rayTracingGM(uchar4* ptrDevPixels, Sphere* ptrDevTabSphere, int nbSphere, uint w, uint h, float t);
 extern __global__ void rayTracingSM(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
 extern __global__ void rayTracingCM(uchar4* ptrDevPixels,Sphere* ptrDevTabSphere,int nbSphere,uint w, uint h,float t);
 
@@ -97,14 +98,14 @@ void RayTracing::process(uchar4* ptrDevPixels, uint w, uint h, const DomaineMath
     Device::lastCudaError("RayTracing rgba uchar4 (before)"); // facultatif, for debug only, remove for release
 
     //Global Memory
-    //rayTracing<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
+    rayTracingGM<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
 
     //Constant Memory
     //rayTracingCM<<<dg,db>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
 
     //Shared Memory
-    size_t sizeOctetSM = nbSphere * sizeof(Sphere);
-    rayTracingSM<<<dg,db, sizeOctetSM>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
+    //size_t sizeOctetSM = nbSphere * sizeof(Sphere);
+    //rayTracingSM<<<dg,db, sizeOctetSM>>>(ptrDevPixels,ptrDevTabSphere,nbSphere,w,h,t);
 
     Device::lastCudaError("RayTracing rgba uchar4 (after)"); // facultatif, for debug only, remove for release
     }

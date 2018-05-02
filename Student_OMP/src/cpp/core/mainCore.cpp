@@ -41,7 +41,7 @@ int mainCore(void)
     Chrono chrono;
     chrono.start();
 
-    isOk &= useHello();
+    //isOk &= useHello();
    isOk &= usePI();
 
     cout << "\n-------------------------------------------------" << endl;

@@ -1,1 +1,1 @@
-/home/arc22/CUDA/toStudent/code/WCuda/Tuto_CppTest//src/cpp/core/standard/scalar/scalar.h
+/home/arc22/CUDA/toStudent/code/WCuda/Tuto_CppTest/src/cpp/core/standard/scalar/scalar.h
